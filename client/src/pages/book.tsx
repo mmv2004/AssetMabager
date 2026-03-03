@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { CheckCircle2, ChevronRight, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
 const TIME_SLOTS = ["10:00", "12:00", "14:00", "16:00", "18:00", "20:00"];
@@ -35,12 +36,6 @@ export default function Book() {
   const { data: services, isLoading: loadingServices } = useServices();
   const { data: specialists, isLoading: loadingSpecialists } = useSpecialists();
   const createBooking = useCreateBooking();
-
-  const [locale, setLocale] = useState<any>(null);
-
-  useEffect(() => {
-    import('date-fns/locale/ru').then(m => setLocale(m.default));
-  }, []);
 
   useEffect(() => {
     if (initialServiceId && formData.serviceId === parseInt(initialServiceId) && step === 1) {
@@ -218,7 +213,7 @@ export default function Book() {
                 
                 <div className="bg-white/5 p-6 rounded-xl border border-white/10 flex flex-col">
                   <h3 className="font-semibold mb-4 text-lg">
-                    {formData.date && locale ? format(formData.date, 'EEEE, d MMMM', { locale }) : "Сначала выберите дату"}
+                    {formData.date ? format(formData.date, 'EEEE, d MMMM', { locale: ru }) : "Сначала выберите дату"}
                   </h3>
                   
                   {formData.date ? (
@@ -301,7 +296,7 @@ export default function Book() {
               </div>
               <h2 className="text-4xl font-bold mb-4">Заявка принята!</h2>
               <p className="text-xl text-muted-foreground max-w-md mx-auto mb-8">
-                Ваш запрос на сессию {formData.date && locale && format(formData.date, 'd MMMM', { locale })} в {formData.time} отправлен. Мы свяжемся с вами в ближайшее время для подтверждения.
+                Ваш запрос на сессию {formData.date && format(formData.date, 'd MMMM', { locale: ru })} в {formData.time} отправлен. Мы свяжемся с вами в ближайшее время для подтверждения.
               </p>
               <Button size="lg" onClick={() => setLocation("/")} className="rounded-xl px-8 h-14">
                 Вернуться на главную

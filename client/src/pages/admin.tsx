@@ -3,6 +3,7 @@ import { useBookings, useUpdateBookingStatus } from "@/hooks/use-bookings";
 import { useServices } from "@/hooks/use-services";
 import { useSpecialists } from "@/hooks/use-specialists";
 import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,11 +16,6 @@ export default function Admin() {
   const { data: specialists } = useSpecialists();
   
   const updateStatus = useUpdateBookingStatus();
-
-  const [locale, setLocale] = useState<any>(null);
-  useEffect(() => {
-    import('date-fns/locale/ru').then(m => setLocale(m.default));
-  }, []);
 
   const getServiceName = (id: number) => services?.find(s => s.id === id)?.title || `Услуга #${id}`;
 
@@ -69,7 +65,7 @@ export default function Admin() {
                       <TableCell className="font-medium whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-primary" />
-                          {locale && format(new Date(booking.bookingTime), "d MMM yyyy, HH:mm", { locale })}
+                          {format(new Date(booking.bookingTime), "d MMM yyyy, HH:mm", { locale: ru })}
                         </div>
                       </TableCell>
                       <TableCell>
