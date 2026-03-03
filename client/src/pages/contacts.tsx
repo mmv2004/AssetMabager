@@ -129,9 +129,5 @@ export default function Contacts() {
         </div>
       </div>
     </Layout>
-
-        </div>
-      </div>
-    </Layout>
   );
 }
