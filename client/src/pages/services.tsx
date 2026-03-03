@@ -12,9 +12,9 @@ export default function Services() {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Studio Services</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Услуги студии</h1>
           <p className="text-lg text-muted-foreground">
-            From raw demos to polished masters, our state-of-the-art facility and experienced engineers provide everything you need to sound your absolute best.
+            От демо-записей до готовых хитов. Наша студия и опытные инженеры помогут вашему звуку раскрыться на максимум.
           </p>
         </div>
 
@@ -37,8 +37,7 @@ export default function Services() {
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-2xl font-bold text-white">{service.title}</h3>
                   <div className="flex items-center gap-1 bg-primary/10 text-primary px-3 py-1 rounded-full font-bold">
-                    <DollarSign className="w-4 h-4" />
-                    {service.price}
+                    {service.price} ₽
                   </div>
                 </div>
                 
@@ -49,14 +48,14 @@ export default function Services() {
                 <div className="flex items-center justify-between pt-6 border-t border-white/10">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock className="w-5 h-5" />
-                    <span>{service.durationMins} Minutes</span>
+                    <span>{service.durationMins} минут</span>
                   </div>
                   
                   <Link 
                     href={`/book?serviceId=${service.id}`}
                     className={buttonVariants({ variant: "default", className: "rounded-xl gap-2" })}
                   >
-                    Book Now <ArrowRight className="w-4 h-4" />
+                    Записаться <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
               </motion.div>
@@ -64,7 +63,7 @@ export default function Services() {
             
             {!services?.length && (
               <div className="col-span-2 text-center py-20 text-muted-foreground">
-                <p>No services configured yet.</p>
+                <p>Услуги пока не добавлены.</p>
               </div>
             )}
           </div>

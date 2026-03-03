@@ -36,8 +36,12 @@ export default function Book() {
   const { data: specialists, isLoading: loadingSpecialists } = useSpecialists();
   const createBooking = useCreateBooking();
 
-  // If service ID is in URL and valid, we can preselect and move to step 2 visually
-  // but let's just pre-fill the form state.
+  const [locale, setLocale] = useState<any>(null);
+
+  useEffect(() => {
+    import('date-fns/locale/ru').then(m => setLocale(m.default));
+  }, []);
+
   useEffect(() => {
     if (initialServiceId && formData.serviceId === parseInt(initialServiceId) && step === 1) {
       setStep(2);
@@ -53,10 +57,9 @@ export default function Book() {
 
   const handleSubmit = async () => {
     if (!formData.serviceId || !formData.date || !formData.time || !formData.clientName || !formData.clientPhone || !formData.clientEmail) {
-      return; // Basic validation
+      return;
     }
 
-    // Combine date and time
     const [hours, minutes] = formData.time.split(':').map(Number);
     const bookingTime = new Date(formData.date);
     bookingTime.setHours(hours, minutes, 0, 0);
@@ -71,16 +74,15 @@ export default function Book() {
         clientEmail: formData.clientEmail,
         clientComment: formData.clientComment || undefined,
       });
-      setStep(5); // Success step
+      setStep(5);
     } catch (err) {
-      // Error handled by mutation hook's toast
     }
   };
 
   const isStepValid = () => {
     switch (step) {
       case 1: return formData.serviceId > 0;
-      case 2: return true; // Specialist is optional
+      case 2: return true;
       case 3: return !!formData.date && !!formData.time;
       case 4: return formData.clientName.trim() && formData.clientPhone.trim() && formData.clientEmail.includes('@');
       default: return true;
@@ -91,11 +93,10 @@ export default function Book() {
     <Layout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20">
         
-        {/* Progress Bar */}
         {step < 5 && (
           <div className="mb-12">
             <div className="flex items-center justify-between mb-4">
-              {['Service', 'Specialist', 'Date & Time', 'Details'].map((label, i) => (
+              {['Услуга', 'Специалист', 'Дата и время', 'Детали'].map((label, i) => (
                 <div key={label} className={cn(
                   "text-sm font-medium transition-colors",
                   step > i + 1 ? "text-primary" : step === i + 1 ? "text-white" : "text-muted-foreground"
@@ -116,10 +117,9 @@ export default function Book() {
 
         <div className="glass-panel p-6 sm:p-10 rounded-3xl min-h-[500px] flex flex-col">
           
-          {/* STEP 1: Service */}
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex-1">
-              <h2 className="text-3xl font-bold mb-8">Select a Service</h2>
+              <h2 className="text-3xl font-bold mb-8">Выберите услугу</h2>
               {loadingServices ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[1,2,3,4].map(i => <div key={i} className="h-32 bg-white/5 rounded-xl animate-pulse"/>)}
@@ -139,8 +139,8 @@ export default function Book() {
                     >
                       <h3 className="text-lg font-bold mb-2">{s.title}</h3>
                       <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>{s.durationMins} mins</span>
-                        <span className="font-semibold text-primary">${s.price}</span>
+                        <span>{s.durationMins} мин</span>
+                        <span className="font-semibold text-primary">{s.price} ₽</span>
                       </div>
                     </div>
                   ))}
@@ -149,13 +149,12 @@ export default function Book() {
             </div>
           )}
 
-          {/* STEP 2: Specialist */}
           {step === 2 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex-1">
               <div className="flex items-end justify-between mb-8">
                 <div>
-                  <h2 className="text-3xl font-bold mb-2">Select a Specialist</h2>
-                  <p className="text-muted-foreground">Optional. Choose an engineer or let us assign one.</p>
+                  <h2 className="text-3xl font-bold mb-2">Выберите специалиста</h2>
+                  <p className="text-muted-foreground">Опционально. Выберите инженера или мы назначим свободного.</p>
                 </div>
               </div>
               
@@ -169,7 +168,7 @@ export default function Book() {
                       : "bg-white/5 border-white/10 hover:border-white/30"
                   )}
                 >
-                  <h3 className="text-lg font-bold">Any Available</h3>
+                  <h3 className="text-lg font-bold">Любой свободный</h3>
                 </div>
                 
                 {specialists?.map(s => (
@@ -200,10 +199,9 @@ export default function Book() {
             </div>
           )}
 
-          {/* STEP 3: Date & Time */}
           {step === 3 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex-1">
-              <h2 className="text-3xl font-bold mb-8">Choose Date & Time</h2>
+              <h2 className="text-3xl font-bold mb-8">Выберите дату и время</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-white/5 p-4 rounded-xl border border-white/10 flex justify-center">
                   <Calendar
@@ -211,7 +209,7 @@ export default function Book() {
                     selected={formData.date}
                     onSelect={(d) => {
                       updateForm("date", d);
-                      updateForm("time", ""); // Reset time on date change
+                      updateForm("time", "");
                     }}
                     disabled={(date) => date < new Date() || date.getDay() === 0}
                     className="bg-transparent"
@@ -220,7 +218,7 @@ export default function Book() {
                 
                 <div className="bg-white/5 p-6 rounded-xl border border-white/10 flex flex-col">
                   <h3 className="font-semibold mb-4 text-lg">
-                    {formData.date ? format(formData.date, 'EEEE, MMMM d') : "Select a date first"}
+                    {formData.date && locale ? format(formData.date, 'EEEE, d MMMM', { locale }) : "Сначала выберите дату"}
                   </h3>
                   
                   {formData.date ? (
@@ -241,7 +239,7 @@ export default function Book() {
                     </div>
                   ) : (
                     <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                      Available times will appear here
+                      Доступное время появится здесь
                     </div>
                   )}
                 </div>
@@ -249,25 +247,24 @@ export default function Book() {
             </div>
           )}
 
-          {/* STEP 4: Details */}
           {step === 4 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex-1">
-              <h2 className="text-3xl font-bold mb-8">Your Details</h2>
+              <h2 className="text-3xl font-bold mb-8">Ваши данные</h2>
               <div className="space-y-5 max-w-2xl mx-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <Label>Full Name</Label>
+                    <Label>ФИО</Label>
                     <Input 
-                      placeholder="Rick Rubin" 
+                      placeholder="Иван Иванов" 
                       value={formData.clientName}
                       onChange={e => updateForm("clientName", e.target.value)}
                       className="h-12 bg-black/20 border-white/10 focus-visible:border-primary"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Phone Number</Label>
+                    <Label>Номер телефона</Label>
                     <Input 
-                      placeholder="(555) 123-4567" 
+                      placeholder="+7 (999) 123-45-67" 
                       value={formData.clientPhone}
                       onChange={e => updateForm("clientPhone", e.target.value)}
                       className="h-12 bg-black/20 border-white/10 focus-visible:border-primary"
@@ -275,19 +272,19 @@ export default function Book() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Email Address</Label>
+                  <Label>Email</Label>
                   <Input 
                     type="email"
-                    placeholder="rick@example.com" 
+                    placeholder="ivan@example.ru" 
                     value={formData.clientEmail}
                     onChange={e => updateForm("clientEmail", e.target.value)}
                     className="h-12 bg-black/20 border-white/10 focus-visible:border-primary"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Project Comments (Optional)</Label>
+                  <Label>Комментарий к проекту (опционально)</Label>
                   <Textarea 
-                    placeholder="Tell us about the tracks, references, or specific gear you want to use..." 
+                    placeholder="Расскажите о треке, референсах или оборудовании, которое хотите использовать..." 
                     value={formData.clientComment}
                     onChange={e => updateForm("clientComment", e.target.value)}
                     className="min-h-[120px] bg-black/20 border-white/10 focus-visible:border-primary"
@@ -297,23 +294,21 @@ export default function Book() {
             </div>
           )}
 
-          {/* STEP 5: Success */}
           {step === 5 && (
             <div className="animate-in zoom-in-95 duration-500 flex-1 flex flex-col items-center justify-center text-center py-12">
               <div className="w-24 h-24 bg-primary/20 text-primary rounded-full flex items-center justify-center mb-6">
                 <CheckCircle2 className="w-12 h-12" />
               </div>
-              <h2 className="text-4xl font-bold mb-4">Booking Received!</h2>
+              <h2 className="text-4xl font-bold mb-4">Заявка принята!</h2>
               <p className="text-xl text-muted-foreground max-w-md mx-auto mb-8">
-                Your session request for {formData.date && format(formData.date, 'MMMM d')} at {formData.time} has been sent. We'll be in touch shortly to confirm.
+                Ваш запрос на сессию {formData.date && locale && format(formData.date, 'd MMMM', { locale })} в {formData.time} отправлен. Мы свяжемся с вами в ближайшее время для подтверждения.
               </p>
               <Button size="lg" onClick={() => setLocation("/")} className="rounded-xl px-8 h-14">
-                Return Home
+                Вернуться на главную
               </Button>
             </div>
           )}
 
-          {/* Form Navigation */}
           {step < 5 && (
             <div className="flex items-center justify-between mt-auto pt-8 border-t border-white/10">
               <Button 
@@ -322,7 +317,7 @@ export default function Book() {
                 disabled={step === 1}
                 className="text-muted-foreground hover:text-white"
               >
-                <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                <ArrowLeft className="w-4 h-4 mr-2" /> Назад
               </Button>
               
               {step < 4 ? (
@@ -331,7 +326,7 @@ export default function Book() {
                   disabled={!isStepValid()}
                   className="rounded-xl px-8"
                 >
-                  Continue <ChevronRight className="w-4 h-4 ml-2" />
+                  Далее <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
                 <Button 
@@ -339,7 +334,7 @@ export default function Book() {
                   disabled={!isStepValid() || createBooking.isPending}
                   className="rounded-xl px-8 bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg hover:shadow-primary/25"
                 >
-                  {createBooking.isPending ? "Submitting..." : "Confirm Booking"}
+                  {createBooking.isPending ? "Отправка..." : "Подтвердить запись"}
                 </Button>
               )}
             </div>

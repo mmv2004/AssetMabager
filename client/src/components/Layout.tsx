@@ -7,10 +7,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
 
   const navLinks = [
-    { href: "/services", label: "Services", icon: Mic2 },
-    { href: "/book", label: "Book Session", icon: CalendarIcon },
-    { href: "/contacts", label: "Contacts", icon: MapPin },
-    { href: "/admin", label: "Admin", icon: ShieldCheck },
+    { href: "/services", label: "Услуги", icon: Mic2 },
+    { href: "/book", label: "Запись", icon: CalendarIcon },
+    { href: "/contacts", label: "Контакты", icon: MapPin },
+    { href: "/admin", label: "Админ", icon: ShieldCheck },
   ];
 
   return (
@@ -23,7 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Mic2 className="w-6 h-6 text-primary" />
             </div>
             <span className="font-display font-bold text-xl tracking-tight text-white group-hover:text-primary transition-colors">
-              AURA<span className="text-primary">STUDIOS</span>
+              AURA<span className="text-primary">STUDIO</span>
             </span>
           </Link>
 
@@ -46,7 +46,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex md:hidden">
              {/* Mobile menu could go here, simplified for brevity */}
              <Link href="/book" className={buttonVariants({ variant: "default", size: "sm" })}>
-                Book Now
+                Записаться
              </Link>
           </div>
         </div>
@@ -64,25 +64,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Mic2 className="w-6 h-6 text-primary" />
               <span className="font-display font-bold text-xl text-white">
-                AURA<span className="text-primary">STUDIOS</span>
+                AURA<span className="text-primary">STUDIO</span>
               </span>
             </Link>
             <p className="text-muted-foreground max-w-sm">
-              Professional recording, mixing, and mastering services in a creative and cozy environment. Your sound, elevated.
+              Профессиональная запись, сведение и мастеринг в творческой и уютной атмосфере. Ваш звук на новом уровне.
             </p>
           </div>
           
           <div>
-            <h4 className="font-display font-semibold text-white mb-4">Contact</h4>
+            <h4 className="font-display font-semibold text-white mb-4">Контакты</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-primary" /> +1 (555) 123-4567</li>
-              <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-primary" /> book@aurastudios.com</li>
-              <li className="flex items-center gap-2"><MapPin className="w-4 h-4 text-primary" /> 123 Music Lane, NY</li>
+              <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-primary" /> +7 (999) 123-45-67</li>
+              <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-primary" /> book@aurastudios.ru</li>
+              <li className="flex items-center gap-2"><MapPin className="w-4 h-4 text-primary" /> ул. Музыкальная, 123, Москва</li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-display font-semibold text-white mb-4">Social</h4>
+            <h4 className="font-display font-semibold text-white mb-4">Соцсети</h4>
             <div className="flex items-center gap-4">
               <Button variant="outline" size="icon" className="rounded-full bg-white/5 border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/50">
                 <Instagram className="w-4 h-4" />

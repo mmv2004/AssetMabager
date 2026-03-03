@@ -14,8 +14,8 @@ export default function Contacts() {
     e.preventDefault();
     // Simulate sending a message
     toast({
-      title: "Message Sent",
-      description: "Thanks for reaching out! We'll get back to you within 24 hours.",
+      title: "Сообщение отправлено",
+      description: "Спасибо за обращение! Мы ответим вам в течение 24 часов.",
     });
     (e.target as HTMLFormElement).reset();
   };
@@ -24,9 +24,9 @@ export default function Contacts() {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Get In Touch</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Свяжитесь с нами</h1>
           <p className="text-lg text-muted-foreground">
-            Have questions about gear, rates, or booking a lockout? Send us a message or drop by the studio.
+            Есть вопросы по оборудованию, ценам или бронированию? Отправьте нам сообщение или загляните в студию.
           </p>
         </div>
 
@@ -44,8 +44,8 @@ export default function Contacts() {
                   <MapPin className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-bold mb-1">Studio Address</h3>
-                  <p className="text-muted-foreground text-sm">123 Music Lane, Suite 400<br/>New York, NY 10001</p>
+                  <h3 className="font-bold mb-1">Адрес студии</h3>
+                  <p className="text-muted-foreground text-sm">ул. Музыкальная, 123, офис 400<br/>Москва, 100001</p>
                 </div>
               </div>
               
@@ -54,8 +54,8 @@ export default function Contacts() {
                   <Phone className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-bold mb-1">Phone</h3>
-                  <p className="text-muted-foreground text-sm">+1 (555) 123-4567<br/>Mon-Sun, 10am - 10pm</p>
+                  <h3 className="font-bold mb-1">Телефон</h3>
+                  <p className="text-muted-foreground text-sm">+7 (999) 123-45-67<br/>Пн-Вс, 10:00 - 22:00</p>
                 </div>
               </div>
               
@@ -65,7 +65,7 @@ export default function Contacts() {
                 </div>
                 <div>
                   <h3 className="font-bold mb-1">Email</h3>
-                  <p className="text-muted-foreground text-sm">book@aurastudios.com<br/>info@aurastudios.com</p>
+                  <p className="text-muted-foreground text-sm">book@aurastudio.ru<br/>info@aurastudio.ru</p>
                 </div>
               </div>
               
@@ -74,8 +74,8 @@ export default function Contacts() {
                   <Clock className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-bold mb-1">Hours</h3>
-                  <p className="text-muted-foreground text-sm">Open Daily 10:00 - 22:00<br/>24/7 for Lockouts</p>
+                  <h3 className="font-bold mb-1">Время работы</h3>
+                  <p className="text-muted-foreground text-sm">Ежедневно 10:00 - 22:00<br/>24/7 по договоренности</p>
                 </div>
               </div>
             </div>
@@ -84,7 +84,7 @@ export default function Contacts() {
             <div className="w-full h-64 rounded-2xl bg-white/5 border border-white/10 overflow-hidden relative group">
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
                 <span className="text-muted-foreground flex items-center gap-2">
-                  <MapPin className="w-5 h-5" /> Interactive Map Area
+                  <MapPin className="w-5 h-5" /> Интерактивная карта
                 </span>
               </div>
               {/* aesthetic map background representation */}
@@ -98,33 +98,37 @@ export default function Contacts() {
             animate={{ opacity: 1, x: 0 }}
             className="glass-panel p-8 md:p-10 rounded-3xl"
           >
-            <h2 className="text-2xl font-bold mb-6">Send a Message</h2>
+            <h2 className="text-2xl font-bold mb-6">Отправить сообщение</h2>
             <form onSubmit={handleSendMessage} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" required placeholder="Your name" className="h-12 bg-black/20 border-white/10 focus-visible:border-primary" />
+                <Label htmlFor="name">Имя</Label>
+                <Input id="name" required placeholder="Ваше имя" className="h-12 bg-black/20 border-white/10 focus-visible:border-primary" />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" required placeholder="your@email.com" className="h-12 bg-black/20 border-white/10 focus-visible:border-primary" />
+                <Input id="email" type="email" required placeholder="your@email.ru" className="h-12 bg-black/20 border-white/10 focus-visible:border-primary" />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="subject">Subject</Label>
-                <Input id="subject" required placeholder="How can we help?" className="h-12 bg-black/20 border-white/10 focus-visible:border-primary" />
+                <Label htmlFor="subject">Тема</Label>
+                <Input id="subject" required placeholder="Чем мы можем помочь?" className="h-12 bg-black/20 border-white/10 focus-visible:border-primary" />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
-                <Textarea id="message" required placeholder="Write your message here..." className="min-h-[150px] bg-black/20 border-white/10 focus-visible:border-primary" />
+                <Label htmlFor="message">Сообщение</Label>
+                <Textarea id="message" required placeholder="Напишите ваше сообщение здесь..." className="min-h-[150px] bg-black/20 border-white/10 focus-visible:border-primary" />
               </div>
               
               <Button type="submit" size="lg" className="w-full h-14 rounded-xl gap-2 text-lg shadow-lg shadow-primary/20">
-                Send Message <Send className="w-5 h-5" />
+                Отправить <Send className="w-5 h-5" />
               </Button>
             </form>
           </motion.div>
+
+        </div>
+      </div>
+    </Layout>
 
         </div>
       </div>
