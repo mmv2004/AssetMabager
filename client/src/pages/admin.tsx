@@ -7,15 +7,58 @@ import { ru } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, X, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Check, X, Clock, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 export default function Admin() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
   const { data: bookings, isLoading: loadingBookings } = useBookings();
   const { data: services } = useServices();
   const { data: specialists } = useSpecialists();
   
   const updateStatus = useUpdateBookingStatus();
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === "admin123") {
+      setIsAuthenticated(true);
+    } else {
+      alert("Неверный пароль");
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <Layout>
+        <div className="min-h-[60vh] flex items-center justify-center px-4">
+          <div className="glass-panel p-8 rounded-3xl w-full max-w-md text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Lock className="w-8 h-8 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold mb-2">Вход для персонала</h1>
+            <p className="text-muted-foreground mb-8">Введите пароль для доступа к управлению записями.</p>
+            
+            <form onSubmit={handleLogin} className="space-y-4">
+              <Input 
+                type="password" 
+                placeholder="Пароль" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-12 bg-black/20 border-white/10 focus-visible:border-primary text-center"
+                autoFocus
+              />
+              <Button type="submit" className="w-full h-12 rounded-xl">
+                Войти
+              </Button>
+            </form>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   const getServiceName = (id: number) => services?.find(s => s.id === id)?.title || `Услуга #${id}`;
 
