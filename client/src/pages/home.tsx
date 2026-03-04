@@ -56,6 +56,11 @@ export default function Home() {
                 Наши услуги
               </Link>
             </div>
+            <div className="mt-8">
+              <Link href="/admin" className="text-xs text-muted-foreground hover:text-primary transition-colors opacity-30 hover:opacity-100">
+                Вход для персонала
+              </Link>
+            </div>
           </motion.div>
         </div>
       </section>

@@ -10,7 +10,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { href: "/services", label: "Услуги", icon: Mic2 },
     { href: "/book", label: "Запись", icon: CalendarIcon },
     { href: "/contacts", label: "Контакты", icon: MapPin },
-    { href: "/admin", label: "Админ", icon: ShieldCheck },
   ];
 
   return (
