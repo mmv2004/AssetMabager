@@ -82,7 +82,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           <div>
             <h4 className="font-display font-semibold text-white mb-4">Соцсети</h4>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 mb-6">
               <Button variant="outline" size="icon" className="rounded-full bg-white/5 border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/50">
                 <Instagram className="w-4 h-4" />
               </Button>
@@ -90,6 +90,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Twitter className="w-4 h-4" />
               </Button>
             </div>
+            <Link href="/admin" className="text-[10px] text-muted-foreground hover:text-primary transition-colors opacity-20 hover:opacity-100 uppercase tracking-widest">
+              Вход для персонала
+            </Link>
           </div>
         </div>
       </footer>

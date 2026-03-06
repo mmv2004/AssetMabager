@@ -14,6 +14,7 @@ import { useState } from "react";
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { data: bookings, isLoading: loadingBookings } = useBookings();
   const { data: services } = useServices();
@@ -23,10 +24,10 @@ export default function Admin() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "admin123") {
+    if (username === "admin" && password === "admin123") {
       setIsAuthenticated(true);
     } else {
-      alert("Неверный пароль");
+      alert("Неверный логин или пароль");
     }
   };
 
@@ -34,22 +35,32 @@ export default function Admin() {
     return (
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center px-4">
-          <div className="glass-panel p-8 rounded-3xl w-full max-w-md text-center">
+          <div className="glass-panel p-8 rounded-3xl w-full max-w-md">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <Lock className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold mb-2">Вход для персонала</h1>
-            <p className="text-muted-foreground mb-8">Введите пароль для доступа к управлению записями.</p>
+            <h1 className="text-2xl font-bold mb-2 text-center">Вход для персонала</h1>
+            <p className="text-muted-foreground mb-8 text-center">Введите учетные данные для доступа.</p>
             
             <form onSubmit={handleLogin} className="space-y-4">
-              <Input 
-                type="password" 
-                placeholder="Пароль" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-12 bg-black/20 border-white/10 focus-visible:border-primary text-center"
-                autoFocus
-              />
+              <div className="space-y-2">
+                <Input 
+                  placeholder="Логин" 
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="h-12 bg-black/20 border-white/10 focus-visible:border-primary"
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-2">
+                <Input 
+                  type="password" 
+                  placeholder="Пароль" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 bg-black/20 border-white/10 focus-visible:border-primary"
+                />
+              </div>
               <Button type="submit" className="w-full h-12 rounded-xl">
                 Войти
               </Button>

@@ -40,7 +40,20 @@ export const reviews = pgTable("reviews", {
 
 export const insertServiceSchema = createInsertSchema(services).omit({ id: true });
 export const insertSpecialistSchema = createInsertSchema(specialists).omit({ id: true });
-export const insertBookingSchema = createInsertSchema(bookings).omit({ id: true, status: true });
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({ id: true });
+export type User = typeof users.$inferSelect;
+
+export const insertBookingSchema = createInsertSchema(bookings).omit({ id: true, status: true }).extend({
+  clientEmail: z.string().email("Некорректный email"),
+  clientPhone: z.string().min(10, "Номер телефона слишком короткий"),
+  clientName: z.string().min(2, "Имя слишком короткое"),
+});
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true });
 
 export type Service = typeof services.$inferSelect;
