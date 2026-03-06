@@ -14,6 +14,9 @@ export interface IStorage {
   getBookings(): Promise<Booking[]>;
   createBooking(booking: z.infer<typeof insertBookingSchema>): Promise<Booking>;
   updateBookingStatus(id: number, status: string): Promise<Booking | undefined>;
+  getReviews(): Promise<Review[]>;
+  createReview(review: z.infer<typeof insertReviewSchema>): Promise<Review>;
+  deleteReview(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -27,6 +30,16 @@ export class DatabaseStorage implements IStorage {
 
   async getReviews(): Promise<Review[]> {
     return await db.select().from(reviews);
+  }
+
+  async createReview(review: z.infer<typeof insertReviewSchema>): Promise<Review> {
+    const [newReview] = await db.insert(reviews).values(review).returning();
+    return newReview;
+  }
+
+  async deleteReview(id: number): Promise<boolean> {
+    const [deleted] = await db.delete(reviews).where(eq(reviews.id, id)).returning();
+    return !!deleted;
   }
 
   async getBookings(): Promise<Booking[]> {

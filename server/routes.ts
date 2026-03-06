@@ -98,6 +98,28 @@ export async function registerRoutes(
     res.json(reviewsList);
   });
 
+  app.post("/api/reviews", async (req, res) => {
+    try {
+      const input = insertReviewSchema.parse(req.body);
+      const newReview = await storage.createReview(input);
+      res.status(201).json(newReview);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/reviews/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const success = await storage.deleteReview(id);
+    if (!success) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+    res.sendStatus(204);
+  });
+
   app.get(api.bookings.list.path, async (req, res) => {
     const bookingsList = await storage.getBookings();
     res.json(bookingsList);
