@@ -49,6 +49,8 @@ export default function Book() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const handlePrev = () => setStep(s => Math.max(s - 1, 1));
+
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
     if (step === 4) {
