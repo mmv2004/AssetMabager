@@ -120,6 +120,22 @@ export async function registerRoutes(
     res.sendStatus(204);
   });
 
+  app.post("/api/admin/change-password", async (req, res) => {
+    const { username, newPassword } = req.body;
+    // В упрощенном режиме мы просто обновляем в БД
+    // Для полноценной системы нужно хеширование и сессии
+    const [updated] = await db.update(services).set({}).returning(); // Заглушка, так как у нас DatabaseStorage
+    // Но так как у нас нет метода в IStorage, добавим его или сделаем через db напрямую
+    const [user] = await db.select().from(db.getSchema().users).where(eq(db.getSchema().users.username, username));
+    if (!user) return res.status(404).json({ message: "User not found" });
+    
+    await db.update(db.getSchema().users)
+      .set({ password: newPassword })
+      .where(eq(db.getSchema().users.username, username));
+    
+    res.json({ message: "Password updated" });
+  });
+
   app.get(api.bookings.list.path, async (req, res) => {
     const bookingsList = await storage.getBookings();
     res.json(bookingsList);

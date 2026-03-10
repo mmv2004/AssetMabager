@@ -47,10 +47,27 @@ export default function Book() {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleNext = () => setStep(s => Math.min(s + 1, 5));
-  const handlePrev = () => setStep(s => Math.max(s - 1, 1));
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateStep = () => {
+    const newErrors: Record<string, string> = {};
+    if (step === 4) {
+      if (formData.clientName.trim().length < 2) newErrors.clientName = "Имя слишком короткое";
+      if (!/^\+?[0-9\s-]{10,}$/.test(formData.clientPhone)) newErrors.clientPhone = "Некорректный номер телефона";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.clientEmail)) newErrors.clientEmail = "Некорректный email";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep()) {
+      setStep(s => Math.min(s + 1, 5));
+    }
+  };
 
   const handleSubmit = async () => {
+    if (!validateStep()) return;
     if (!formData.serviceId || !formData.date || !formData.time || !formData.clientName || !formData.clientPhone || !formData.clientEmail) {
       return;
     }
@@ -70,7 +87,10 @@ export default function Book() {
         clientComment: formData.clientComment || undefined,
       });
       setStep(5);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.message) {
+        setErrors({ submit: err.message });
+      }
     }
   };
 
@@ -248,33 +268,45 @@ export default function Book() {
               <div className="space-y-5 max-w-2xl mx-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <Label>ФИО</Label>
+                    <Label className={cn(errors.clientName && "text-destructive")}>ФИО</Label>
                     <Input 
                       placeholder="Иван Иванов" 
                       value={formData.clientName}
-                      onChange={e => updateForm("clientName", e.target.value)}
-                      className="h-12 bg-black/20 border-white/10 focus-visible:border-primary"
+                      onChange={e => {
+                        updateForm("clientName", e.target.value);
+                        if (errors.clientName) setErrors(prev => ({ ...prev, clientName: "" }));
+                      }}
+                      className={cn("h-12 bg-black/20 border-white/10 focus-visible:border-primary", errors.clientName && "border-destructive")}
                     />
+                    {errors.clientName && <p className="text-xs text-destructive">{errors.clientName}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label>Номер телефона</Label>
+                    <Label className={cn(errors.clientPhone && "text-destructive")}>Номер телефона</Label>
                     <Input 
                       placeholder="+7 (999) 123-45-67" 
                       value={formData.clientPhone}
-                      onChange={e => updateForm("clientPhone", e.target.value)}
-                      className="h-12 bg-black/20 border-white/10 focus-visible:border-primary"
+                      onChange={e => {
+                        updateForm("clientPhone", e.target.value);
+                        if (errors.clientPhone) setErrors(prev => ({ ...prev, clientPhone: "" }));
+                      }}
+                      className={cn("h-12 bg-black/20 border-white/10 focus-visible:border-primary", errors.clientPhone && "border-destructive")}
                     />
+                    {errors.clientPhone && <p className="text-xs text-destructive">{errors.clientPhone}</p>}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Email</Label>
+                  <Label className={cn(errors.clientEmail && "text-destructive")}>Email</Label>
                   <Input 
                     type="email"
                     placeholder="ivan@example.ru" 
                     value={formData.clientEmail}
-                    onChange={e => updateForm("clientEmail", e.target.value)}
-                    className="h-12 bg-black/20 border-white/10 focus-visible:border-primary"
+                    onChange={e => {
+                      updateForm("clientEmail", e.target.value);
+                      if (errors.clientEmail) setErrors(prev => ({ ...prev, clientEmail: "" }));
+                    }}
+                    className={cn("h-12 bg-black/20 border-white/10 focus-visible:border-primary", errors.clientEmail && "border-destructive")}
                   />
+                  {errors.clientEmail && <p className="text-xs text-destructive">{errors.clientEmail}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Комментарий к проекту (опционально)</Label>

@@ -30,9 +30,20 @@ export default function Admin() {
   
   const updateStatus = useUpdateBookingStatus();
 
-  const [newReview, setNewReview] = useState({ clientName: "", content: "", rating: 5 });
+  const [newPasswordValue, setNewPasswordValue] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await apiRequest("POST", "/api/admin/change-password", { username: "admin", newPassword: newPasswordValue });
+      toast({ title: "Успех", description: "Пароль изменен" });
+      setNewPasswordValue("");
+    } catch (err) {
+      toast({ variant: "destructive", title: "Ошибка", description: "Не удалось изменить пароль" });
+    }
+  };
+
+  if (!isAuthenticated) {
     e.preventDefault();
     if (username === "admin" && password === "admin123") {
       setIsAuthenticated(true);
@@ -134,6 +145,7 @@ export default function Admin() {
           <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl">
             <TabsTrigger value="bookings" className="rounded-lg data-[state=active]:bg-primary">Заявки</TabsTrigger>
             <TabsTrigger value="reviews" className="rounded-lg data-[state=active]:bg-primary">Отзывы</TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-primary">Настройки</TabsTrigger>
           </TabsList>
 
           <TabsContent value="bookings">
@@ -307,6 +319,29 @@ export default function Admin() {
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <div className="max-w-md mx-auto">
+              <div className="glass-panel p-8 rounded-2xl border border-white/10">
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <Lock className="w-5 h-5 text-primary" /> Изменить пароль
+                </h2>
+                <form onSubmit={handleChangePassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Новый пароль</Label>
+                    <Input 
+                      type="password" 
+                      value={newPasswordValue}
+                      onChange={e => setNewPasswordValue(e.target.value)}
+                      className="bg-black/20 border-white/10"
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full rounded-xl">Обновить пароль</Button>
+                </form>
               </div>
             </div>
           </TabsContent>
