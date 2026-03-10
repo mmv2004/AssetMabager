@@ -101,7 +101,7 @@ export default function Book() {
       case 1: return formData.serviceId > 0;
       case 2: return true;
       case 3: return !!formData.date && !!formData.time;
-      case 4: return formData.clientName.trim() && formData.clientPhone.trim() && formData.clientEmail.includes('@');
+      case 4: return true; // Разрешаем нажать "Подтвердить", чтобы сработала валидация с ошибками
       default: return true;
     }
   };
