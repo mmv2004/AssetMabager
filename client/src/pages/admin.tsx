@@ -31,6 +31,16 @@ export default function Admin() {
   const updateStatus = useUpdateBookingStatus();
 
   const [newPasswordValue, setNewPasswordValue] = useState("");
+  const [newReview, setNewReview] = useState({ clientName: "", content: "", rating: 5 });
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username === "admin" && password === "admin123") {
+      setIsAuthenticated(true);
+    } else {
+      toast({ variant: "destructive", title: "Ошибка", description: "Неверный логин или пароль" });
+    }
+  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,15 +50,6 @@ export default function Admin() {
       setNewPasswordValue("");
     } catch (err) {
       toast({ variant: "destructive", title: "Ошибка", description: "Не удалось изменить пароль" });
-    }
-  };
-
-  if (!isAuthenticated) {
-    e.preventDefault();
-    if (username === "admin" && password === "admin123") {
-      setIsAuthenticated(true);
-    } else {
-      toast({ variant: "destructive", title: "Ошибка", description: "Неверный логин или пароль" });
     }
   };
 
