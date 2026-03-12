@@ -33,6 +33,7 @@ export default function Admin() {
 
   const [newPasswordValue, setNewPasswordValue] = useState("");
   const [newReview, setNewReview] = useState({ clientName: "", content: "", rating: 5 });
+  const [statusFilter, setStatusFilter] = useState<"all" | "new" | "confirmed" | "rejected">("all");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,6 +152,36 @@ export default function Admin() {
           </TabsList>
 
           <TabsContent value="bookings">
+            <div className="flex flex-wrap gap-2 mb-4">
+              {([
+                { key: "all", label: "Все заявки" },
+                { key: "new", label: "Новые" },
+                { key: "confirmed", label: "Подтверждённые" },
+                { key: "rejected", label: "Отклонённые" },
+              ] as const).map(({ key, label }) => (
+                <Button
+                  key={key}
+                  size="sm"
+                  variant={statusFilter === key ? "default" : "outline"}
+                  onClick={() => setStatusFilter(key)}
+                  className={cn(
+                    "rounded-xl",
+                    statusFilter !== key && "bg-transparent border-white/20 hover:border-primary/50"
+                  )}
+                >
+                  {label}
+                  {key !== "all" && (
+                    <span className="ml-2 text-xs opacity-70">
+                      ({bookings?.filter(b => b.status === key).length ?? 0})
+                    </span>
+                  )}
+                  {key === "all" && (
+                    <span className="ml-2 text-xs opacity-70">({bookings?.length ?? 0})</span>
+                  )}
+                </Button>
+              ))}
+            </div>
+
             <div className="glass-panel rounded-2xl overflow-hidden border border-white/10">
               {loadingBookings ? (
                 <div className="p-12 text-center text-muted-foreground animate-pulse">Загрузка заявок...</div>
@@ -168,7 +199,8 @@ export default function Admin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {bookings?.sort((a,b) => new Date(b.bookingTime).getTime() - new Date(a.bookingTime).getTime()).map(booking => (
+                      {bookings?.filter(b => statusFilter === "all" || b.status === statusFilter)
+                        .sort((a,b) => new Date(b.bookingTime).getTime() - new Date(a.bookingTime).getTime()).map(booking => (
                         <TableRow key={booking.id} className="border-white/5 hover:bg-white/[0.02] transition-colors">
                           <TableCell className="font-medium whitespace-nowrap">
                             <div className="flex items-center gap-2">
@@ -220,10 +252,10 @@ export default function Admin() {
                         </TableRow>
                       ))}
                       
-                      {!bookings?.length && (
+                      {bookings?.filter(b => statusFilter === "all" || b.status === statusFilter).length === 0 && (
                         <TableRow>
                           <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                            Заявок пока нет.
+                            {statusFilter === "all" ? "Заявок пока нет." : "Нет заявок с таким статусом."}
                           </TableCell>
                         </TableRow>
                       )}

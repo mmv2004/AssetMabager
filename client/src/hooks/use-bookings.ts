@@ -87,7 +87,7 @@ export function useUpdateBookingStatus() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.bookings.list.path] });
-      queryClient.invalidateQueries({ predicate: (q) => typeof q.queryKey[0] === "string" && (q.queryKey[0] as string).startsWith("/api/booked-slots") });
+      queryClient.invalidateQueries({ queryKey: ["/api/booked-slots"] });
       toast({ title: "Status Updated", description: "The booking status has been successfully updated." });
     },
     onError: (error) => {

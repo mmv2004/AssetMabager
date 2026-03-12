@@ -39,13 +39,19 @@ export default function Book() {
   const createBooking = useCreateBooking();
 
   const dateStr = formData.date ? format(formData.date, "yyyy-MM-dd") : null;
-  const bookedSlotsUrl = dateStr && formData.specialistId
-    ? `/api/booked-slots?date=${dateStr}&specialistId=${formData.specialistId}`
-    : null;
 
   const { data: bookedSlots = [] } = useQuery<string[]>({
-    queryKey: [bookedSlotsUrl ?? "/api/booked-slots"],
-    enabled: !!bookedSlotsUrl,
+    queryKey: ["/api/booked-slots", dateStr, formData.specialistId ?? null],
+    enabled: !!dateStr && !!formData.specialistId,
+    staleTime: 0,
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/booked-slots?date=${dateStr}&specialistId=${formData.specialistId}`,
+        { credentials: "include" }
+      );
+      if (!res.ok) return [];
+      return res.json();
+    },
   });
 
   useEffect(() => {
