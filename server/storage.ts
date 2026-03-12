@@ -76,11 +76,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    return result.map(b => {
-      const h = b.bookingTime.getHours().toString().padStart(2, "0");
-      const m = b.bookingTime.getMinutes().toString().padStart(2, "0");
-      return `${h}:${m}`;
-    });
+    return result.map(b => b.bookingTime.toISOString());
   }
 }
 

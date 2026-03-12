@@ -258,7 +258,10 @@ export default function Book() {
                   {formData.date ? (
                     <div className="grid grid-cols-2 gap-3 mt-4">
                       {TIME_SLOTS.map(time => {
-                        const isBooked = bookedSlots.includes(time);
+                        const localBookedTimes = bookedSlots.map(iso =>
+                          format(new Date(iso), "HH:mm")
+                        );
+                        const isBooked = localBookedTimes.includes(time);
                         return (
                           <Button
                             key={time}
