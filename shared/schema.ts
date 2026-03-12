@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -37,6 +37,25 @@ export const reviews = pgTable("reviews", {
   content: text("content").notNull(),
   rating: integer("rating").notNull(),
 });
+
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  subject: text("subject").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+});
+
+export const insertMessageSchema = createInsertSchema(messages).omit({ id: true, createdAt: true, isRead: true }).extend({
+  email: z.string().email("Некорректный email"),
+  name: z.string().min(2, "Имя слишком короткое"),
+  subject: z.string().min(1, "Укажите тему"),
+  content: z.string().min(5, "Сообщение слишком короткое"),
+});
+
+export type Message = typeof messages.$inferSelect;
 
 export const insertServiceSchema = createInsertSchema(services).omit({ id: true });
 export const insertSpecialistSchema = createInsertSchema(specialists).omit({ id: true });

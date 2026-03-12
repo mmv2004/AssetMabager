@@ -3,6 +3,7 @@ import { useBookings, useUpdateBookingStatus } from "@/hooks/use-bookings";
 import { useServices } from "@/hooks/use-services";
 import { useSpecialists } from "@/hooks/use-specialists";
 import { useReviews } from "@/hooks/use-reviews";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,11 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, X, Clock, Lock, Star, Trash2, Plus } from "lucide-react";
+import { Check, X, Clock, Lock, Star, Trash2, Plus, Mail, MailOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import type { Message } from "@shared/schema";
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -34,6 +36,31 @@ export default function Admin() {
   const [newPasswordValue, setNewPasswordValue] = useState("");
   const [newReview, setNewReview] = useState({ clientName: "", content: "", rating: 5 });
   const [statusFilter, setStatusFilter] = useState<"all" | "new" | "confirmed" | "rejected">("all");
+
+  const { data: msgs, isLoading: loadingMessages } = useQuery<Message[]>({
+    queryKey: ["/api/messages"],
+    enabled: isAuthenticated,
+  });
+
+  const handleMarkRead = async (id: number) => {
+    try {
+      await apiRequest("PATCH", `/api/messages/${id}/read`);
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+    } catch {
+      toast({ variant: "destructive", title: "Ошибка", description: "Не удалось обновить статус" });
+    }
+  };
+
+  const handleDeleteMessage = async (id: number) => {
+    if (!confirm("Удалить это сообщение?")) return;
+    try {
+      await apiRequest("DELETE", `/api/messages/${id}`);
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      toast({ title: "Удалено", description: "Сообщение удалено" });
+    } catch {
+      toast({ variant: "destructive", title: "Ошибка", description: "Не удалось удалить сообщение" });
+    }
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,9 +172,17 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="bookings" className="space-y-8">
-          <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl">
+          <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl flex-wrap h-auto gap-1">
             <TabsTrigger value="bookings" className="rounded-lg data-[state=active]:bg-primary">Заявки</TabsTrigger>
             <TabsTrigger value="reviews" className="rounded-lg data-[state=active]:bg-primary">Отзывы</TabsTrigger>
+            <TabsTrigger value="messages" className="rounded-lg data-[state=active]:bg-primary flex items-center gap-2">
+              Сообщения
+              {msgs && msgs.filter(m => !m.isRead).length > 0 && (
+                <span className="bg-primary text-white text-xs px-1.5 py-0.5 rounded-full leading-none">
+                  {msgs.filter(m => !m.isRead).length}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-primary">Настройки</TabsTrigger>
           </TabsList>
 
@@ -354,6 +389,69 @@ export default function Admin() {
                   )}
                 </div>
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="messages">
+            <div className="glass-panel rounded-2xl overflow-hidden border border-white/10">
+              {loadingMessages ? (
+                <div className="p-12 text-center text-muted-foreground animate-pulse">Загрузка сообщений...</div>
+              ) : (
+                <div className="divide-y divide-white/5">
+                  {!msgs?.length && (
+                    <div className="p-12 text-center text-muted-foreground">Сообщений пока нет.</div>
+                  )}
+                  {msgs?.slice().reverse().map(msg => (
+                    <div
+                      key={msg.id}
+                      className={cn("p-6 flex gap-4 transition-colors", !msg.isRead && "bg-primary/5")}
+                    >
+                      <div className="mt-1 flex-shrink-0">
+                        {msg.isRead
+                          ? <MailOpen className="w-5 h-5 text-muted-foreground" />
+                          : <Mail className="w-5 h-5 text-primary" />
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-3 mb-1">
+                          <span className="font-bold">{msg.name}</span>
+                          <span className="text-sm text-muted-foreground">{msg.email}</span>
+                          {!msg.isRead && (
+                            <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">Новое</Badge>
+                          )}
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {format(new Date(msg.createdAt), "d MMM yyyy, HH:mm", { locale: ru })}
+                          </span>
+                        </div>
+                        <p className="font-semibold text-sm mb-2">{msg.subject}</p>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{msg.content}</p>
+                      </div>
+                      <div className="flex flex-col gap-2 flex-shrink-0">
+                        {!msg.isRead && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="text-muted-foreground hover:text-primary"
+                            onClick={() => handleMarkRead(msg.id)}
+                            title="Отметить прочитанным"
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
+                        )}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="text-muted-foreground hover:text-red-500"
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          title="Удалить"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </TabsContent>
 

@@ -1,8 +1,8 @@
 import { db } from "./db";
 import {
-  services, specialists, bookings, reviews,
-  type Service, type Specialist, type Booking, type Review,
-  type insertBookingSchema
+  services, specialists, bookings, reviews, messages,
+  type Service, type Specialist, type Booking, type Review, type Message,
+  type insertBookingSchema, type insertMessageSchema
 } from "@shared/schema";
 import { and, eq, gte, lt } from "drizzle-orm";
 import { z } from "zod";
@@ -17,6 +17,10 @@ export interface IStorage {
   createReview(review: z.infer<typeof insertReviewSchema>): Promise<Review>;
   deleteReview(id: number): Promise<boolean>;
   getBookedSlots(date: string, specialistId: number): Promise<string[]>;
+  getMessages(): Promise<Message[]>;
+  createMessage(message: z.infer<typeof insertMessageSchema>): Promise<Message>;
+  markMessageRead(id: number): Promise<Message | undefined>;
+  deleteMessage(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -77,6 +81,25 @@ export class DatabaseStorage implements IStorage {
       );
 
     return result.map(b => b.bookingTime.toISOString());
+  }
+
+  async getMessages(): Promise<Message[]> {
+    return await db.select().from(messages).orderBy(messages.createdAt);
+  }
+
+  async createMessage(message: z.infer<typeof insertMessageSchema>): Promise<Message> {
+    const [newMsg] = await db.insert(messages).values(message).returning();
+    return newMsg;
+  }
+
+  async markMessageRead(id: number): Promise<Message | undefined> {
+    const [updated] = await db.update(messages).set({ isRead: true }).where(eq(messages.id, id)).returning();
+    return updated;
+  }
+
+  async deleteMessage(id: number): Promise<boolean> {
+    const [deleted] = await db.delete(messages).where(eq(messages.id, id)).returning();
+    return !!deleted;
   }
 }
 

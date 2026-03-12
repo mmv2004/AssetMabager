@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,18 +7,38 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Contacts() {
   const { toast } = useToast();
+  const [sending, setSending] = useState(false);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate sending a message
-    toast({
-      title: "Сообщение отправлено",
-      description: "Спасибо за обращение! Мы ответим вам в течение 24 часов.",
-    });
-    (e.target as HTMLFormElement).reset();
+    const form = e.target as HTMLFormElement;
+    const data = {
+      name: (form.elements.namedItem("name") as HTMLInputElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      subject: (form.elements.namedItem("subject") as HTMLInputElement).value,
+      content: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
+    };
+    setSending(true);
+    try {
+      await apiRequest("POST", "/api/messages", data);
+      toast({
+        title: "Сообщение отправлено",
+        description: "Спасибо за обращение! Мы ответим вам в течение 24 часов.",
+      });
+      form.reset();
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Ошибка",
+        description: "Не удалось отправить сообщение. Попробуйте ещё раз.",
+      });
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -120,8 +141,8 @@ export default function Contacts() {
                 <Textarea id="message" required placeholder="Напишите ваше сообщение здесь..." className="min-h-[150px] bg-black/20 border-white/10 focus-visible:border-primary" />
               </div>
               
-              <Button type="submit" size="lg" className="w-full h-14 rounded-xl gap-2 text-lg shadow-lg shadow-primary/20">
-                Отправить <Send className="w-5 h-5" />
+              <Button type="submit" size="lg" disabled={sending} className="w-full h-14 rounded-xl gap-2 text-lg shadow-lg shadow-primary/20">
+                {sending ? "Отправка..." : <><span>Отправить</span><Send className="w-5 h-5" /></>}
               </Button>
             </form>
           </motion.div>

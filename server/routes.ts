@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { db } from "./db";
-import { services, specialists, reviews } from "@shared/schema";
+import { services, specialists, reviews, insertMessageSchema } from "@shared/schema";
 
 async function seedDatabase() {
   const existingServices = await storage.getServices();
@@ -191,6 +191,38 @@ export async function registerRoutes(
       }
       throw err;
     }
+  });
+
+  app.get("/api/messages", async (req, res) => {
+    const list = await storage.getMessages();
+    res.json(list);
+  });
+
+  app.post("/api/messages", async (req, res) => {
+    try {
+      const input = insertMessageSchema.parse(req.body);
+      const msg = await storage.createMessage(input);
+      res.status(201).json(msg);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/messages/:id/read", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const updated = await storage.markMessageRead(id);
+    if (!updated) return res.status(404).json({ message: "Message not found" });
+    res.json(updated);
+  });
+
+  app.delete("/api/messages/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const success = await storage.deleteMessage(id);
+    if (!success) return res.status(404).json({ message: "Message not found" });
+    res.sendStatus(204);
   });
 
   return httpServer;
