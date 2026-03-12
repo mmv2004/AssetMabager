@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
 import { useServices } from "@/hooks/use-services";
 import { useSpecialists } from "@/hooks/use-specialists";
@@ -36,6 +37,16 @@ export default function Book() {
   const { data: services, isLoading: loadingServices } = useServices();
   const { data: specialists, isLoading: loadingSpecialists } = useSpecialists();
   const createBooking = useCreateBooking();
+
+  const dateStr = formData.date ? format(formData.date, "yyyy-MM-dd") : null;
+  const bookedSlotsUrl = dateStr && formData.specialistId
+    ? `/api/booked-slots?date=${dateStr}&specialistId=${formData.specialistId}`
+    : null;
+
+  const { data: bookedSlots = [] } = useQuery<string[]>({
+    queryKey: [bookedSlotsUrl ?? "/api/booked-slots"],
+    enabled: !!bookedSlotsUrl,
+  });
 
   useEffect(() => {
     if (initialServiceId && formData.serviceId === parseInt(initialServiceId) && step === 1) {
@@ -240,19 +251,24 @@ export default function Book() {
                   
                   {formData.date ? (
                     <div className="grid grid-cols-2 gap-3 mt-4">
-                      {TIME_SLOTS.map(time => (
-                        <Button
-                          key={time}
-                          variant={formData.time === time ? "default" : "outline"}
-                          className={cn(
-                            "w-full h-12 text-lg rounded-xl",
-                            formData.time !== time && "bg-transparent border-white/20 hover:border-primary/50"
-                          )}
-                          onClick={() => updateForm("time", time)}
-                        >
-                          {time}
-                        </Button>
-                      ))}
+                      {TIME_SLOTS.map(time => {
+                        const isBooked = bookedSlots.includes(time);
+                        return (
+                          <Button
+                            key={time}
+                            variant={formData.time === time ? "default" : "outline"}
+                            disabled={isBooked}
+                            className={cn(
+                              "w-full h-12 text-lg rounded-xl",
+                              formData.time !== time && !isBooked && "bg-transparent border-white/20 hover:border-primary/50",
+                              isBooked && "opacity-30 cursor-not-allowed line-through"
+                            )}
+                            onClick={() => !isBooked && updateForm("time", time)}
+                          >
+                            {time}
+                          </Button>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="flex-1 flex items-center justify-center text-muted-foreground">

@@ -136,6 +136,18 @@ export async function registerRoutes(
     res.json({ message: "Password updated" });
   });
 
+  app.get("/api/booked-slots", async (req, res) => {
+    const { date, specialistId } = req.query;
+    if (!date || typeof date !== "string") {
+      return res.status(400).json({ message: "date is required" });
+    }
+    if (!specialistId || typeof specialistId !== "string" || isNaN(parseInt(specialistId))) {
+      return res.json([]);
+    }
+    const slots = await storage.getBookedSlots(date, parseInt(specialistId));
+    res.json(slots);
+  });
+
   app.get(api.bookings.list.path, async (req, res) => {
     const bookingsList = await storage.getBookings();
     res.json(bookingsList);
