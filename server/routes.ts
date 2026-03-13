@@ -4,7 +4,8 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { db } from "./db";
-import { services, specialists, reviews, insertMessageSchema } from "@shared/schema";
+import { services, specialists, reviews, users, insertMessageSchema } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 async function seedDatabase() {
   const existingServices = await storage.getServices();
@@ -121,19 +122,20 @@ export async function registerRoutes(
   });
 
   app.post("/api/admin/change-password", async (req, res) => {
-    const { username, newPassword } = req.body;
-    // В упрощенном режиме мы просто обновляем в БД
-    // Для полноценной системы нужно хеширование и сессии
-    const [updated] = await db.update(services).set({}).returning(); // Заглушка, так как у нас DatabaseStorage
-    // Но так как у нас нет метода в IStorage, добавим его или сделаем через db напрямую
-    const [user] = await db.select().from(db.getSchema().users).where(eq(db.getSchema().users.username, username));
-    if (!user) return res.status(404).json({ message: "User not found" });
-    
-    await db.update(db.getSchema().users)
-      .set({ password: newPassword })
-      .where(eq(db.getSchema().users.username, username));
-    
-    res.json({ message: "Password updated" });
+    const { username, currentPassword, newPassword } = req.body;
+    if (!username || !currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Заполните все поля" });
+    }
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    if (!user) return res.status(404).json({ message: "Пользователь не найден" });
+    if (user.password !== currentPassword) {
+      return res.status(403).json({ message: "Неверный текущий пароль" });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "Новый пароль должен быть не короче 6 символов" });
+    }
+    await db.update(users).set({ password: newPassword }).where(eq(users.username, username));
+    res.json({ message: "Пароль обновлён" });
   });
 
   app.get("/api/booked-slots", async (req, res) => {
