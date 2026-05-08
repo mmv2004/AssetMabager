@@ -4,8 +4,11 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { db } from "./db";
-import { services, specialists, reviews, users, insertMessageSchema } from "@shared/schema";
+import { services, specialists, reviews, users, insertMessageSchema, insertReviewSchema } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
+
+const BCRYPT_ROUNDS = 10;
 
 async function seedDatabase() {
   const existingServices = await storage.getServices();
@@ -74,13 +77,21 @@ async function seedDatabase() {
       }
     ]);
   }
+
+  // Создаём администратора по умолчанию с захэшированным паролем,
+  // если таблица пользователей пуста
+  const existingUsers = await db.select().from(users);
+  if (existingUsers.length === 0) {
+    const hashedPassword = await bcrypt.hash("admin123", BCRYPT_ROUNDS);
+    await db.insert(users).values({ username: "admin", password: hashedPassword });
+  }
 }
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  
+
   // Seed the database
   seedDatabase().catch(console.error);
 
@@ -121,6 +132,24 @@ export async function registerRoutes(
     res.sendStatus(204);
   });
 
+  // Вход администратора — проверяет логин и пароль через bcrypt
+  app.post("/api/admin/login", async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: "Заполните все поля" });
+    }
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    if (!user) {
+      return res.status(401).json({ message: "Неверный логин или пароль" });
+    }
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Неверный логин или пароль" });
+    }
+    res.json({ message: "OK" });
+  });
+
+  // Смена пароля — проверяет текущий пароль и сохраняет новый в захэшированном виде
   app.post("/api/admin/change-password", async (req, res) => {
     const { username, currentPassword, newPassword } = req.body;
     if (!username || !currentPassword || !newPassword) {
@@ -128,13 +157,17 @@ export async function registerRoutes(
     }
     const [user] = await db.select().from(users).where(eq(users.username, username));
     if (!user) return res.status(404).json({ message: "Пользователь не найден" });
-    if (user.password !== currentPassword) {
+
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!passwordMatch) {
       return res.status(403).json({ message: "Неверный текущий пароль" });
     }
     if (newPassword.length < 6) {
       return res.status(400).json({ message: "Новый пароль должен быть не короче 6 символов" });
     }
-    await db.update(users).set({ password: newPassword }).where(eq(users.username, username));
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    await db.update(users).set({ password: hashedNewPassword }).where(eq(users.username, username));
     res.json({ message: "Пароль обновлён" });
   });
 

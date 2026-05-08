@@ -33,6 +33,7 @@ export default function Admin() {
   
   const updateStatus = useUpdateBookingStatus();
 
+  const [currentPasswordValue, setCurrentPasswordValue] = useState("");
   const [newPasswordValue, setNewPasswordValue] = useState("");
   const [newReview, setNewReview] = useState({ clientName: "", content: "", rating: 5 });
   const [statusFilter, setStatusFilter] = useState<"all" | "new" | "confirmed" | "rejected">("all");
@@ -62,23 +63,32 @@ export default function Admin() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Вход: проверка логина и пароля через сервер (bcrypt)
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === "admin" && password === "admin123") {
+    try {
+      await apiRequest("POST", "/api/admin/login", { username, password });
       setIsAuthenticated(true);
-    } else {
+    } catch {
       toast({ variant: "destructive", title: "Ошибка", description: "Неверный логин или пароль" });
     }
   };
 
+  // Смена пароля: отправляет текущий и новый пароль на сервер
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiRequest("POST", "/api/admin/change-password", { username: "admin", newPassword: newPasswordValue });
-      toast({ title: "Успех", description: "Пароль изменен" });
+      await apiRequest("POST", "/api/admin/change-password", {
+        username,
+        currentPassword: currentPasswordValue,
+        newPassword: newPasswordValue,
+      });
+      toast({ title: "Успех", description: "Пароль изменён" });
+      setCurrentPasswordValue("");
       setNewPasswordValue("");
-    } catch (err) {
-      toast({ variant: "destructive", title: "Ошибка", description: "Не удалось изменить пароль" });
+    } catch (err: any) {
+      const message = err?.message || "Не удалось изменить пароль";
+      toast({ variant: "destructive", title: "Ошибка", description: message });
     }
   };
 
@@ -115,11 +125,11 @@ export default function Admin() {
             </div>
             <h1 className="text-2xl font-bold mb-2 text-center">Вход для персонала</h1>
             <p className="text-muted-foreground mb-8 text-center">Введите учетные данные для доступа.</p>
-            
+
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Input 
-                  placeholder="Логин" 
+                <Input
+                  placeholder="Логин"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="h-12 bg-black/20 border-white/10 focus-visible:border-primary"
@@ -127,9 +137,9 @@ export default function Admin() {
                 />
               </div>
               <div className="space-y-2">
-                <Input 
-                  type="password" 
-                  placeholder="Пароль" 
+                <Input
+                  type="password"
+                  placeholder="Пароль"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-12 bg-black/20 border-white/10 focus-visible:border-primary"
@@ -260,18 +270,18 @@ export default function Admin() {
                           <TableCell className="text-right whitespace-nowrap">
                             {booking.status === 'new' && (
                               <div className="flex items-center justify-end gap-2">
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
+                                <Button
+                                  size="sm"
+                                  variant="outline"
                                   className="border-green-500/30 text-green-500 hover:bg-green-500/10 hover:text-green-400"
                                   onClick={() => updateStatus.mutate({ id: booking.id, status: 'confirmed' })}
                                   disabled={updateStatus.isPending}
                                 >
                                   <Check className="w-4 h-4 mr-1" /> Принять
                                 </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
+                                <Button
+                                  size="sm"
+                                  variant="outline"
                                   className="border-red-500/30 text-red-500 hover:bg-red-500/10 hover:text-red-400"
                                   onClick={() => updateStatus.mutate({ id: booking.id, status: 'rejected' })}
                                   disabled={updateStatus.isPending}
@@ -286,7 +296,7 @@ export default function Admin() {
                           </TableCell>
                         </TableRow>
                       ))}
-                      
+
                       {bookings?.filter(b => statusFilter === "all" || b.status === statusFilter).length === 0 && (
                         <TableRow>
                           <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
@@ -310,8 +320,8 @@ export default function Admin() {
                   </h2>
                   <form onSubmit={handleAddReview} className="space-y-4">
                     <div className="space-y-2">
-                      <Input 
-                        placeholder="Имя артиста" 
+                      <Input
+                        placeholder="Имя артиста"
                         value={newReview.clientName}
                         onChange={e => setNewReview(prev => ({ ...prev, clientName: e.target.value }))}
                         className="bg-black/20 border-white/10"
@@ -319,8 +329,8 @@ export default function Admin() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Textarea 
-                        placeholder="Текст отзыва" 
+                      <Textarea
+                        placeholder="Текст отзыва"
                         value={newReview.content}
                         onChange={e => setNewReview(prev => ({ ...prev, content: e.target.value }))}
                         className="bg-black/20 border-white/10 min-h-[100px]"
@@ -328,11 +338,11 @@ export default function Admin() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Input 
-                        type="number" 
-                        min="1" 
-                        max="5" 
-                        placeholder="Рейтинг (1-5)" 
+                      <Input
+                        type="number"
+                        min="1"
+                        max="5"
+                        placeholder="Рейтинг (1-5)"
                         value={newReview.rating}
                         onChange={e => setNewReview(prev => ({ ...prev, rating: parseInt(e.target.value) }))}
                         className="bg-black/20 border-white/10"
@@ -372,9 +382,9 @@ export default function Admin() {
                                 </div>
                               </TableCell>
                               <TableCell className="text-right">
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
                                   className="text-muted-foreground hover:text-red-500"
                                   onClick={() => handleDeleteReview(review.id)}
                                 >
@@ -462,6 +472,16 @@ export default function Admin() {
                   <Lock className="w-5 h-5 text-primary" /> Изменить пароль
                 </h2>
                 <form onSubmit={handleChangePassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Текущий пароль</Label>
+                    <Input
+                      type="password"
+                      value={currentPasswordValue}
+                      onChange={e => setCurrentPasswordValue(e.target.value)}
+                      className="bg-black/20 border-white/10"
+                      required
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label>Новый пароль</Label>
                     <Input 
